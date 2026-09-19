@@ -17,24 +17,15 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Create Base Properties
+      - name: Fix Telegram Gradle Settings
         run: |
-          mkdir -p TMessagesProj
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo "api_id=123456" >> local.properties
           echo "api_hash=abcdef1234567890abcdef1234567890" >> local.properties
-          
-          # Отключаем обязательные проверки Google-сервисов, чтобы сборка не падала
-          echo "manifestmerger.enabled=true" >> local.properties
+          # Очищаем сломанный файл настроек и пишем туда только базовые модули приложения
+          echo "include ':TMessagesProj'" > settings.gradle
 
       - name: Build Official Telegram APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleNoosdebug --stacktrace --no-daemon
-        continue-on-error: true
-
-      - name: Find and Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Telegram-Official-Debug-APK
-          path: "**/outputs/apk/**/*.apk"
+          ./gradlew :TMessagesProj:assembleDebug --no-daemon
