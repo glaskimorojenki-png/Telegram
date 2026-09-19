@@ -21,15 +21,10 @@ jobs:
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo "storeFile=debug.keystore" >> local.properties
+          echo "api_id=123456" >> local.properties
+          echo "api_hash=abcdef1234567890abcdef1234567890" >> local.properties
 
       - name: Build APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleNoosdebug --no-daemon || ./gradlew assembleDebug --no-daemon
-        continue-on-error: true
-
-      - name: Find and Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Telegram-Custom-APK
-          path: "**/build/outputs/apk/**/*.apk"
+          ./gradlew assembleDebug --no-daemon
