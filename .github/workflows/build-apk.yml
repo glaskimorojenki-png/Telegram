@@ -17,15 +17,20 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Fix Telegram Gradle Settings
+      - name: Generate Empty Telegram Keys & Configs
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo "api_id=123456" >> local.properties
           echo "api_hash=abcdef1234567890abcdef1234567890" >> local.properties
-          # Очищаем сломанный файл настроек и пишем туда только базовые модули приложения
-          echo "include ':TMessagesProj'" > settings.gradle
+          
+          # Создаем обязательные пустые файлы, которые ищет Telegram при сборке
+          mkdir -p TMessagesProj/src/main/assets
+          touch TMessagesProj/src/main/assets/voip_build_vars.txt
+          
+          # Отключаем падения из-за отсутствия ключей Google Play
+          echo "manifestmerger.enabled=true" >> local.properties
 
-      - name: Build Official Telegram APK
+      - name: Build Official Telegram APK (Debug)
         run: |
           chmod +x gradlew
-          ./gradlew :TMessagesProj:assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
