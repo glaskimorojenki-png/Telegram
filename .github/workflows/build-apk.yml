@@ -1,7 +1,7 @@
 name: Build Telegram APK
 
 on:
-  workflow_dispatch: # Кнопка ручного запуска
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,17 +17,19 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Create Fake Local Properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "storeFile=debug.keystore" >> local.properties
 
       - name: Build APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleWithOutputsDebug --no-daemon
+          ./gradlew assembleNoosdebug --no-daemon || ./gradlew assembleDebug --no-daemon
         continue-on-error: true
 
-      - name: Upload APK Artifact
+      - name: Find and Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Telegram-Custom-APK
-          path: TMessagesProj/build/outputs/apk/**/*.apk
+          path: "**/build/outputs/apk/**/*.apk"
